@@ -427,16 +427,18 @@ impl Settings {
       );
     }
 
-    let client = Client::new(&rpc_url, bitcoin_credentials.clone()).with_context(|| {
-      format!(
-        "failed to connect to Bitcoin Core RPC at `{rpc_url}` with {}",
-        match bitcoin_credentials {
-          Auth::None => "no credentials".into(),
-          Auth::UserPass(_, _) => "username and password".into(),
-          Auth::CookieFile(cookie_file) => format!("cookie file at {}", cookie_file.display()),
-        }
-      )
-    })?;
+    //let client = Client::new(&rpc_url, bitcoin_credentials.clone()).with_context(|| {
+    let client = Client::new_with_custom_timeout(&rpc_url, bitcoin_credentials.clone(), 120)
+      .with_context(|| {
+        format!(
+          "failed to connect to Bitcoin Core RPC at `{rpc_url}` with {}",
+          match bitcoin_credentials {
+            Auth::None => "no credentials".into(),
+            Auth::UserPass(_, _) => "username and password".into(),
+            Auth::CookieFile(cookie_file) => format!("cookie file at {}", cookie_file.display()),
+          }
+        )
+      })?;
 
     let mut checks = 0;
     let rpc_chain = loop {
